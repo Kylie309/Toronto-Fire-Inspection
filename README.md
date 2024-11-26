@@ -1,4 +1,4 @@
-# Fire Safety Regulation Violations in Toronto: Analysis by Region, Property Type, and Inspection Duration for Inspections Closed in 2024
+# Fire Safety Regulation Violations in Toronto: Analysis by Property Type and Inspection Duration for Inspections Closed in 2024
 
 ## Overview
 
