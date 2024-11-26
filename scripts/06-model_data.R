@@ -1,37 +1,49 @@
 #### Preamble ####
-# Purpose: Models... [...UPDATE THIS...]
-# Author: Rohan Alexander [...UPDATE THIS...]
-# Date: 11 February 2023 [...UPDATE THIS...]
-# Contact: rohan.alexander@utoronto.ca [...UPDATE THIS...]
+# Purpose: Construct Bayesian Model for fire inspection outcome
+# Author: Yunkai Gu
+# Date: 24 November 2024
+# Contact: kylie.gu@mail.utoronto.ca
 # License: MIT
-# Pre-requisites: [...UPDATE THIS...]
-# Any other information needed? [...UPDATE THIS...]
+# Pre-requisites: Downloaded and cleaned data.
+# Any other information needed? None
 
 
 #### Workspace setup ####
 library(tidyverse)
+library(janitor)
+library(lubridate)
+library(broom)
+library(modelsummary)
 library(rstanarm)
+library(splines)
 
 #### Read data ####
-analysis_data <- read_csv("data/analysis_data/analysis_data.csv")
+cleaned_data <- read_csv("data/02-analysis_data/fire_cleaned_data.csv")
+
 
 ### Model data ####
-first_model <-
-  stan_glm(
-    formula = flying_time ~ length + width,
-    data = analysis_data,
-    family = gaussian(),
-    prior = normal(location = 0, scale = 2.5, autoscale = TRUE),
-    prior_intercept = normal(location = 0, scale = 2.5, autoscale = TRUE),
-    prior_aux = exponential(rate = 1, autoscale = TRUE),
-    seed = 853
+cleaned_data <- cleaned_data |>
+  mutate(
+    address_name = factor(address_name),
+    property_type = factor(property_type)
   )
 
+priors <- normal(0, 2.5, autoscale = TRUE)
 
-#### Save model ####
-saveRDS(
-  first_model,
-  file = "models/first_model.rds"
+bayesian_model_1 <- stan_glm(
+  formula = violation ~ date_num + property_type,
+  data = cleaned_data,
+  family = binomial(link = "logit"),
+  prior = priors,
+  prior_intercept = priors,
+  seed = 123,
+  cores = 4,
+  adapt_delta = 0.95,
+  iter = 2000
 )
 
+saveRDS(
+  bayesian_model_1,
+  file = "models/model_1.rds"
+)
 
