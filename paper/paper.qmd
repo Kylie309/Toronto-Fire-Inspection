@@ -10,6 +10,7 @@ abstract: "First sentence. Second sentence. Third sentence. Fourth sentence."
 format: pdf
 number-sections: true
 toc: true
+prefer-html: true
 bibliography: references.bib
 ---
 
@@ -29,9 +30,14 @@ library(splines)
 library(ggplot2)
 library(arrow)
 library(knitr)
+library(kableExtra)
 library(RColorBrewer)
+library(broom.mixed)
 
 # Read the cleaned data
+cleaned_data <- read_csv(
+  file = here::here("data/02-analysis_data/fire_cleaned_data.csv")
+  )
 data <- read_csv(
   file = here::here("data/02-analysis_data/fire_cleaned_data.csv")
   )
@@ -265,22 +271,21 @@ Then define the inspection time interval for observation $i$ as date_num and the
 The Bayesian model could be defined by the following mathematical expressions:
 
 
-
-$$ \text{logit}(p_i) = \beta_0 + \beta_1 \cdot \text{date}_i + \beta_2 \cdot \text{type}_i $$
-$$ \text{logit}(p_i) = \log\left(\frac{p_i}{1 - p_i}\right) $$
-$$ \beta_0 \sim \mbox{Normal}(0, 2.5) $$
-$$ \beta_1 \sim \mbox{Normal}(0, 2.5) $$
-$$ \beta_2 \sim \mbox{Normal}(0, 2.5) $$
-
-
+\begin{align} 
+\text{logit}(p_i) = \beta_0 + \beta_1 \cdot \text{date}_i + \beta_2 \cdot \text{type}_i \\
+\text{logit}(p_i) = \log\left(\frac{p_i}{1 - p_i}\right) \\
+\beta_0 \sim \mbox{Normal}(0, 2.5) \\
+\beta_1 \sim \mbox{Normal}(0, 2.5) \\
+\beta_2 \sim \mbox{Normal}(0, 2.5)
+\end{align}
 
 
 where:
 
 - $\text{logit}(p_i) = \log\left(\frac{p_i}{1 - p_i}\right)$ is the log-odds of $p_i$.
-- $\beta_0$ is the intercept term of the Bayesian logistic regression, representing the baseline log-odds of a violation when `date_num = 0` and `property_type` is the reference category. Formula (2) specifies that $\beta_0$ follows normal distribution with mean equals 0 and variance equals $2.5^2$.
-- $\beta_1$ is the coefficient for predictor variable `date_num`, representing the change in log-odds of a violation per unit increase in `date_num`, the inspection time interval. Formula (3) specifies that $\beta_1$ follows normal distribution with mean equals 0 and variance equals $2.5^2$.
-- $\beta_2$ is the coefficient for predictor variable `property_type`, representing the change in log-odds of a violation per unit increase in `property_type`. Formula (4) specifies that $\beta_2$ follows normal distribution with mean equals 0 and variance equals $2.5^2$.
+- $\beta_0$ is the intercept term of the Bayesian logistic regression, representing the baseline log-odds of a violation when 'date_num = 0' and 'property_type' is the reference category. Formula (2) specifies that $\beta_0$ follows normal distribution with mean equals 0 and variance equals $2.5^2$.
+- $\beta_1$ is the coefficient for predictor variable 'date_num‘, representing the change in log-odds of a violation per unit increase in 'date_num', the inspection time interval. Formula (3) specifies that $\beta_1$ follows normal distribution with mean equals 0 and variance equals $2.5^2$.
+- $\beta_2$ is the coefficient for predictor variable ’property_type', representing the change in log-odds of a violation per unit increase in 'property_type'. Formula (4) specifies that $\beta_2$ follows normal distribution with mean equals 0 and variance equals $2.5^2$.
 
 Formula (2), (3) and (4) specifies priors for the model. This prior reflects the assumption that coefficients are centered around 0, with a standard deviation of 2.5, allowing moderate variability while discouraging extreme values.
 
@@ -310,7 +315,7 @@ The predictor variable as 'date_num' is modeled as fixed effect in the model. Th
 
 The other predictor variable 'property_type' is also modeled as fixed effect. Since it is categorical variable, modeling it as fixed effect allow the model to estimate a separate coefficient for each category, relative to a reference level. This would make it easier to compare between property types, in order to understand which types of properties would be observed to have violations. Moreover, since 'property_type' has only 10 levels, it is feasible to compute it as fixed effect and conduct estimation without overloading the model. 
 
-The prior of $Normal(0,2.5)$ for every coefficients is also reasonable because it reflects prior knowledge that most predictors have small-to-moderate effects on the log-odds scale. This assumption would avoid overfitting to extreme values.
+The prior of $\mbox{Normal}(0, 2.5)$ for every coefficients is also reasonable because it reflects prior knowledge that most predictors have small-to-moderate effects on the log-odds scale. This assumption would avoid overfitting to extreme values.
 
 The above final model decision is made after considering several alternative models and variants. One alternative is a simple linear regression model (SLR), which assumes a constant linear relationship between the predictor (violation) and the response (date_num). Although the model is extremely straightforward and easy to interpret, it is far too simple for estimating and neglect the key variable of 'property_type'. More importantly, the response variable is binary, whereas SLR assumes a continuous response variable. MLR also assumes so, and therefore is considered and rejected because of the same reason.
 
@@ -323,6 +328,8 @@ Therefore, after considering many alternatives, the final model of Bayesian logi
 
 # Results
 
+## Model Summary
+
 Our results are summarized in @tbl-modelresults.
 
 ```{r}
@@ -332,7 +339,7 @@ Our results are summarized in @tbl-modelresults.
 #| message: false
 
 model <-
-  readRDS(file = here::here("models/model_1.rds"))
+  readRDS(file = here::here("models/violation_prediction_model.rds"))
 ```
 
 ```{r}
@@ -357,6 +364,64 @@ modelsummary::modelsummary(
 #)
 ```
 
+
+## Posterior Parameter Estimates
+
+
+```{r}
+#| echo: false
+#| eval: true
+#| label: tbl-posteriorestimate
+#| tbl-cap: "Posterior Parameter Estimates"
+#| warning: false
+
+# Summarize the Bayesian model
+summary_stats <- summary(model)
+
+# Use `tidy()` for a clean tabular format
+library(broom.mixed)
+tidy_stats <- tidy(model, conf.int = TRUE)
+
+# Create a table of parameter estimates
+library(knitr)
+
+tidy_stats %>%
+  kable(format = "simple", col.names = c("Parameter", "Estimate", "Std.Error", "Conf.Low", "Conf.High"))
+
+```
+
+
+
+## Distribution of Predicted Probabilities
+
+@fig-predictprob plots the distribution of predicted probabilities for the model. X-axis represents the predicted probabilities ($p_i$) of the outcome for each observation in the dataset, and the values of probabilities are bounded from 0 to 1. Y-axis represents the relative density of observations iwth particular predicted probabilities.The density curve on the graph represents the estimated density of predicted probabilities, and the curve's height reflects how concentrated the predicted probabilities are around specific values.
+
+In general, the distribution shown by the plot has two peaks near 0 and 1, with very few probabilities in the intermediate range (0.25–0.75). This is a bimodal distribution, meaning that most observations are confidently predicted to either not have a violation ($p\approx0$) or have a violation ($p\approx1$). The sparse region in the intermediate range suggests that the model is making confident predictions, with minimal uncertainty for most observations.
+
+The plot shows that the distribution has higher peak, which also means higher density, around $p=1$. On the other hand, the peak around $p = 0$ is slightly lower. This indicates more confident predictions for observations with a high probability of a violation, meaning that the model predicts a larger proportion of observations with high confidence that a violation is likely to occur.
+
+Therefore, the conclusion drawn from the graph is that: more observations are predicted to have a high probability (mostly $p>0.9$) of being observed to have a violation.
+
+```{r}
+#| label: fig-predictprob
+#| fig-cap: Distribution of Predicted Probabilities
+#| echo: false
+#| warning: false
+#| message: false
+
+# Generate predicted probabilities
+predicted_probs <- posterior_predict(model)
+
+# Visualize predicted probabilities
+ggplot(
+  data = data.frame(predicted_probs = as.vector(predicted_probs)), 
+  aes(x = predicted_probs)
+  ) +
+  geom_density(fill = "blue", alpha = 0.5) +
+  labs(x = "Predicted Probability",
+       y = "Density") +
+  theme_minimal()
+```
 
 
 
@@ -438,10 +503,9 @@ The plot shows that the curves for $y$ (observed data) and $y_rep$ (posterior pr
 
 Comparing the posterior distribution with the prior one is also necessary for model validation. It examines how the model fits and is affected by the data.
 
-Prior distribution represents the beliefs about the parameter values before observing any data, which is constructed by our initial assumptions. Posterior distribution reflects updated beliefs about the parameters after observing the data.
+Prior distribution represents the beliefs about the parameter values before observing any data, which is constructed by our initial assumptions. In the plot, it is represented by horizontal lines with points centered at the prior mean (in this case, 0) in the right panel. 
 
-In the plot, the posterior distribution is demonstrated on the left side, and the prior distribution is on the right side. Y-axis shows every parameter included in the model, each colored dot on the graph represents a parameter, and the horizontal line indicates the uncertainty.
-
+Posterior distribution reflects updated beliefs about the parameters after observing the data. It is represented by points (means or medians), which have colors representing the parameters respectively, and horizontal lines, which are credible intervals, derived from the data. The shorter horizontal lines, the narrower credible intervals, the more the reduced uncertainty for the parameter estimation after incorporating the data.
 
 ```{r}
 #| eval: true
@@ -451,43 +515,75 @@ In the plot, the posterior distribution is demonstrated on the left side, and th
 #| label: fig-posteriorvsprior
 #| fig-cap: "Comparing the Posterior with the Prior"
 
-#posterior_vs_prior(model) +
-#  theme_minimal() +
-#  scale_color_brewer(palette = "Set1") +
-#  theme(legend.position = "bottom") +
-#  coord_flip()
+posterior_vs_prior(model) +
+  theme_minimal() +
+  theme(legend.position = "bottom") +
+  coord_flip()
 ```
 
-@fig-posteriorvsprior, compares the posterior with the prior distribution of the model, validating whether data has a significant impact on the parameter estimates and whether the model is well-fit. 
 
-Shown by the red dot representing "intercept", the narrower posterior compares to the prior one suggests that the model provide good estimate in baseline. 
+@fig-posteriorvsprior compares the posterior with the prior distribution of the Bayesian model included in this paper, validating whether the data has a significant impact on the parameter estimates and whether the model is well-fit. 
 
-Shown by the blue dot representing predictor variable 'date_num', the posterior mean is close to 0, indicating little effect of it on the probability of violations. On the other hand, the credible interval is much narrower than the prior, reflecting strong eveidence from the data.
+In general, each level shows a narrower posterior distribution than the prior, reflecting that the uncertainty decreases and the data provides substantial information to update the prior beliefs. Parameters with credible intervals far from zero in the posterior are strongly influenced by the data and have meaningful effects, such as property type of 'Rooming House' (prprty_typRH) and 'Group Home' (prprty_typeGH).
 
-The rest of dots representing different levels of predictor variable 'property_type' show various posterior means and credible intervals. For instance, for high-rise buildings, the posterior mean is positive, indicating that high-rise buildings have higher log-odds of violations than the reference category. In general, each level shows a narrower posterior distribution than the prior, reflecting that the uncertainty decreases and the posterior distributions center around data-driven values.
+Shown by the point representing 'Intercept', the posterior credible interval is narrower than the prior, suggesting strong data support for it. The negative posterior mean indicates that the baseline log-odds of a violation for the reference property type (when date_num = 0) is below 0 (i.e., a low probability of violation).
+
+The posterior point for date_num is very narrow and centered near 0, suggesting that the data indicates little or no effect of inspection time interval on the log-odds of a violation. The credible interval includes 0, reinforcing the lack of a strong relationship between date_num and violations.
+
+Each property type coefficient represents the deviation in log-odds from the reference category. 
+
+For instance, The points representing 'Rooming House' (prprty_RH), 'High Rise' (prprty_HR) and 'Group Home' (prprty_GH), have posterior distribution above 0, suggesting that rooming houses, high-rise buildings and group homes are more likely to have violations than the reference category. Narrow credible intervals indicate strong data support.
+
+On the other hand, the point representing 'Nursing Home' (prprty_NH) have posteriors close to 0, suggesting their effects are small or negligible compared to the reference category. Narrow credible intervals still indicate strong data support.
+
+The rest of dots representing different levels of 'property type' show various posterior means and credible intervals. Most of the points are close to 0 or above 0, providing information about effects of different property types respectively.
 
 
 ## Diagnostics
 
-@fig-stanareyouokay-1 is a trace plot. It shows... This suggests...
+### Trace Plot
 
-@fig-stanareyouokay-2 is a Rhat plot. It shows... This suggests...
+Trace plot shows samples from all the chains. 
+
+In the trance plot, x-axis represents the iteration numbers of the MCMC progress (in this case, up to 4000 iterations per chain), and y-axis displays the sampled values of the posterior distribution for each parameter. Each MCMC chain used during sampling is represented by a different color or line style..
+
+If all chains appear to oscillate around the same mean, and overlap significantly, it suggests that the parameter estimates are stable around a consistent mean. It is also a good sign if the chains have overlap in most regions and move freely across the posterior distribution. There should also be no systematic patterns, trends or large jumps.
 
 ```{r}
 #| echo: false
 #| eval: true
 #| message: false
 #| warning: false
-#| label: fig-stanareyouokay
-#| fig-cap: "Checking the convergence of the MCMC algorithm"
-#| fig-subcap: ["Trace plot", "Rhat plot"]
-#| layout-ncol: 2
+#| label: fig-trace
+#| fig-cap: "Checking the Convergence of the MCMC Algorithm by Trace Plot"
 
-#plot(first_model, "trace")
-
-#plot(first_model, "rhat")
+plot(model, "trace")
 ```
 
+
+@fig-trace shows the trace plot for the Bayesian model used in this paper. The chains for all parameters appear to mix well, with no signs of one chain dominating or exploring a different region of the parameter space. The parameters, especially 'Intercept' and 'date_num', show overlapping chains, which is a positive sign of convergence.
+
+Moreover, most chains is stabilized and oscillates around a consistent mean. The consistent behavior across iterations indciates that the chains have reached stationarity. Also, there are no visible divergences or chain-specific trends, suggesting the sampling process is functioning correctly.
+
+In general, the trace plots suggest that MCMC chains are converged, supported by good mixing, stationarity, and consistent sampling across chains, indicating that the posterior estimates for all parameters are likely reliable. Slight variability may be adjusted by more iterations, which aimed to gather additional independent samples.
+
+
+### R-hat Plot
+
+$\hat{R}$ is a diagnostic measure that compares the variance within each chain to the variance between chains. This diagnostic plot is used to asses the convergence of MCMC chains.Ideally, the $\hat{R}$ should be close to 1, so that chains have mixed well and are sampling from the same posterior distribution. For $\hat{R} \leq 1.5$, we could say that convergence is acceptable. 
+
+@fig-rhat is the R-hat plot for the Bayesian model used in this paper. The plot shows that the R-hat values for all parameters are below 1.05, suggesting that the chains have converged well and are sampling effectively from the posterior distribution. The posterior samples are likely reliable for inference, indicating that the results are robust and can be used for interpreting parameter estimates.
+
+```{r}
+#| echo: false
+#| eval: true
+#| message: false
+#| warning: false
+#| label: fig-rhat
+#| fig-cap: "Checking the Convergence of the MCMC Algorithm by Rhat Plot"
+
+plot(model, "rhat")
+```
 
 
 \newpage
