@@ -1,7 +1,7 @@
 #### Preamble ####
 # Purpose: Cleans the raw data of Highrise Residential Fire Inspection Results
 # Author: Yunkai Gu
-# Date: 21 November 2024
+# Date: 1 December 2024
 # Contact: kylie.gu@mail.utoronto.ca
 # License: MIT
 # Pre-requisites: Downloaded raw data from Open Data Toronto
@@ -46,10 +46,9 @@ cleaned_data <-
     violation = if_else(violations_item_number == 0, 0, 1)
   ) |>
   # Select and retain only the specified columns needed
-  select(address_name, enforcement_proceedings, property_type, 
-         inspections_opendate, inspections_closeddate, 
-         violations_item_number, date_num, violation)
+  select(property_type, inspections_opendate, inspections_closeddate, 
+         date_num, violation)
 
 
 #### Save data ####
-write_csv(cleaned_data, "data/02-analysis_data/fire_cleaned_data.csv")
+write_parquet(cleaned_data, "data/02-analysis_data/fire_cleaned_data.parquet")
