@@ -5,7 +5,7 @@
 # Date: 1 December 2024
 # Contact: kylie.gu@mail.utoronto.ca
 # License: MIT
-# Pre-requisites: The `tidyverse` package must be installed.
+# Pre-requisites: The `tidyverse` package must be installed and loaded
 # Any other information needed? None
 
 
@@ -18,13 +18,13 @@ library(tidyverse)
 set.seed(123)
 
 # Set number of rows in simulation data
-n <- 13200
+n <- 13193
 
 # Property types
 property_type <- c(
   "High Rise",
   "Low Rise",
-  "Detension",
+  "Detention",
   "Group Home",
   "Group Home (VO)",
   "Hospital",
@@ -42,16 +42,16 @@ violation <- c(0,1)
 simulated_data <- tibble(
   #Randomly select from a set of property types
   property_type = sample(property_type, n, replace = TRUE), 
-  #Randomly selected dates from 2019-07 to 2024-11 as open date
-  inspections_opendate = sample(seq(as.Date("2019-07-01"), 
-                                    as.Date("2024-11-30"), by = "day"), 
+  #Randomly selected dates from 2019-07-09 to 2024-11-20 as open date
+  inspections_opendate = sample(seq(as.Date("2019-07-09"), 
+                                    as.Date("2024-11-20"), by = "day"), 
                                 n, replace = TRUE),
-  #Randomly selected dates from 2024-01 to 2024-11 as closed date
-  inspections_closeddate = sample(seq(as.Date("2024-01-01"), 
-                                    as.Date("2024-11-30"), by = "day"), 
+  #Randomly selected dates from 2024-01-02 to 2024-11-28 as closed date
+  inspections_closeddate = sample(seq(as.Date("2024-01-02"), 
+                                    as.Date("2024-11-28"), by = "day"), 
                                 n, replace = TRUE),
-  # Randomly select integers from 0 to 1700 
-  date_num = sample(0:1700, n, replace = TRUE),
+  # Randomly select integers from 0 to 1679
+  date_num = sample(0:1679, n, replace = TRUE),
   #Randomly select from 1 and 0 for violation indicator
   violation = sample(violation, n, replace = TRUE)
 )
