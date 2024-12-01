@@ -34,6 +34,7 @@ library(kableExtra)
 library(RColorBrewer)
 library(broom.mixed)
 
+
 # Read the cleaned data
 cleaned_data <- read_csv(
   file = here::here("data/02-analysis_data/fire_cleaned_data.csv")
@@ -41,6 +42,7 @@ cleaned_data <- read_csv(
 data <- read_csv(
   file = here::here("data/02-analysis_data/fire_cleaned_data.csv")
   )
+
 ```
 
 
@@ -58,16 +60,21 @@ Telegraphing paragraph: The remainder of this paper is structured as follows. @s
 
 
 
-
-
-
 # Data {#sec-data}
 
 ## Overview
 
 This paper uses Highrise Residential Fire Inspection Results dataset obtained from Open Data Toronto as the main source of data [@fire_data]. The portal is launched by City of Toronto to meet growing demand for open data. The raw dataset presents information of properties where Inspectors from Toronto Fire Services (TFS) have examined on, as well as whether the properties violated fire safety regulations and the details of violations if so.
 
-We use the statistical programming language R [@citeR].... 
+Note that though the dataset named "Highrise" Residential Fire Inspection Results, expansion work completed in 2020 has allowed for inspection results for more prperty types to be presented in the dataset. The portal now not only shows residential high-rise buildings, but also shows "inspection matters for multi-unit residential occupancy types including high-rise, low-rise, small multi-unit buildings, rooming houses/group homes, hotels, motels, detention centres, and all applicable vulnerable occupancy buildings (hospitals, nursing homes, residential cares and group homes designated a VO)" [@fire_info].
+
+To ensure the analysis presented in this paper remains relevant and current, only inspection cases that have concluded their inspection files or enforcement proceedings within the year 2024 are selected. This is achieved by filtering the dataset to keep only rows where the 'INSPECTIONS_CLOSEDDATE' column displays a date that falls within the year 2024. This approach ensures that the data reflects the most recent developments, providing an up-to-date basis for analysis and maintaining a clear and accurate representation of the latest trends and outcomes in fire safety checks. 
+
+More detailed data cleaning process is included in [Appendix -@sec-appx-data].
+
+The analyses presented in this paper were conducted using R programming language [@citeR]. The `tidyverse` packages [@citetidyverse] were used in the process of data simulation, testing beforehand. After the original raw data was downloaded by using `tidyverse` package [@citetidyverse], data cleaning process was done by using `tidyverse` package [@citetidyverse], `lubridate` package [@citelubridate], and `arrow` package [@citearrow]. We use `testthat` package [@citetest] to develop the test for structure and format of simulation and analysis data. 
+
+Then, models were constructed using `tidyverse` package [@citetidyverse], `lubridate` package [@citelubridate] and `rstanarm` [@citerstanarm] package. The model results were then presented by both the tables and graphs. Tables were made with `modelsummary` [@citemodelsummary] package, `broom.mixed` [@citebroom] package, `dplyr` [@citedplyr] package and `knitr` package. Graphs were made with `ggplot2` package [@citeggplot] and `RColorBrewer` package [@citercolorbrewer].
 
 Following @tellingstories, this paper uses Bayesian modeling to predict the pass or fail status for safety checks of the properties in Toronto. The factors of region, property type and inspection time intervals from the dataset are mainly chosen and considered to examine their effects on the likelihood of violations for the properties.
 
@@ -131,6 +138,7 @@ data |>
   )
 
 ```
+
 
 
 ## Predictor Variables
@@ -240,6 +248,48 @@ data_other |>
 
 
 
+## Violation by Property Type
+
+@fig-violationbytype depicts faceted bar plots showing the distribution of violation statuses (0 for no violation, 1 for violation) across different property types. Each subplot corresponds to a different property type.
+
+In general, property types of "Group Home," "High Rise," "Low Rise," and "Rooming House," have a higher proportion of violations (1). The type "Hotel & Motel" has balanced counts between 0 and 1, but violations (1) are slightly more frequent. These property types may require more attention or stricter inspections.
+
+The other property types, especially "Detention" and "Nursing Home", show a much lower proportion of violations, suggesting fewer relative violation ratio.
+
+
+```{r}
+#| label: fig-violationbytype
+#| fig-cap: Violation Status by Property Type
+#| echo: false
+#| warning: false
+#| message: false
+
+
+data |> 
+  ggplot(aes(x = as.factor(violation), fill = as.factor(violation))) +
+  geom_bar(color = "black") +
+  facet_wrap(~ property_type, scales = "free_y") + # Create one subplot per property type
+  labs(
+    x = "Violation Status",
+    y = "Count",
+    fill = "Violation Status"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(size = 10),
+    axis.text.y = element_blank(), 
+    axis.title.x = element_text(size = 12),
+    axis.title.y = element_text(size = 12),
+    strip.text = element_text(size = 8), 
+    legend.title = element_text(size = 12),
+    legend.text = element_text(size = 10),
+    panel.spacing = unit(1, "lines")
+  ) +
+  scale_fill_manual(values = c("skyblue", "orange"))
+```
+
+
+
 # Model
 
 The goal of the modelling strategy is twofold. 
@@ -307,6 +357,7 @@ Thirdly, the model assumes priors of $\text{Norma}(0,2.5)$ for the coefficients.
 Also, if new property_type levels are introduced, the model may not be no longer appropriate for the new situation, as fixed effects could not be feasible to compute estimates. Random effects, then, may be more appropriate.
 
 
+
 ## Model Justification
 
 Since the response variable is binary for each case and follows a Bernoulli distribution, it would be appropriate to use Bayesian logistic regression model to estimate it. 
@@ -326,11 +377,19 @@ While considering alternative Bayesian logistics model, the model with 'property
 Therefore, after considering many alternatives, the final model of Bayesian logistics model with 'date_num' and 'property_type' as fixed effect is chosen. It could directly provides explicit comparisons between property types without overfitting the model, and meet the focus of the research question.
 
 
+
 # Results
 
 ## Model Summary
 
-Our results are summarized in @tbl-modelresults.
+Our results of the Bayesian logistic regression model are summarized in @tbl-modelresults. The table provides information of coefficients and main summary statistics.
+
+The table firstly lists estimates of coefficients for all parameters. The first line suggests an intercept of -6.72 for the model, indicating very low baseline odds of a violation for the reference property type when date_num = 0. The second line presents that the estimated coefficient for date_num is 0.02, which is very small and suggests that the inspection time interval has negligible effect on the violation outcome of observations.
+
+Then the table shows the coefficients for every property type respectively. All property types show large positive coefficients, meaning that they increase the log-odds of violations and have higher risk of violation compared to the reference property type. For instance, for property type of "Group Home", it increases log-odds of violation by 5.88; for property type of "High Rise", it increases log-odds of violation by 6.21; for property type of "Hospital", it increases log-odds of violation by 4.67; etc. It could be observed that "Nursing Home" has the smallest coefficient, and thus has the smallest effect on violation. However, it still contribute positively to the log-odds.
+
+The table also presents summary statistics of the model. One of the important results include $R^2=0.342$. $R^2$ is the proportion of the variation in the dependent variable that is predictable from the independent variables [@wiki_rsquare]. R-squared of 0.342 suggests that 34.2% of the variability in the response variable (violation) is explained by the model, which is relatively good for logistic regression. Moreover, the RMSE (Root Mean Squared Error) value of 0.32 shows the average deviation between predicted probabilities and observed outcomes. This value is low, indicates a satisfactory fit for the model.
+
 
 ```{r}
 #| echo: false
@@ -346,27 +405,22 @@ model <-
 #| echo: false
 #| eval: true
 #| label: tbl-modelresults
-#| tbl-cap: "Explanatory models of flight time based on wing width and wing length"
+#| tbl-cap: "Explanatory Models of Probability of Violation based on Inspection Time Interval and Property Type"
 #| warning: false
 
 modelsummary::modelsummary(
-  models = model,
+  list(
+    "Model" = model
+  ),
   statistic = "mad",
   fmt = 2
 )
-
-#modelsummary::modelsummary(
-#  list(
-#    "First model" = model,
-#  ),
-#  statistic = "mad",
-#  fmt = 2
-#)
 ```
 
 
 ## Posterior Parameter Estimates
 
+@tbl-posteriorestimate shows more detailed information about the coefficients of each parameter. Column "Estimate" presents the mean posterior estimate for the effect of each parameter on the log-odds of the outcome (violation); "Std.Error" presents the standard deviationor the uncertainty in the estimate; "Conf.Low" and "Conf.High" are the lower and upper bounds of the 95% credible interval for the parameter, showing the range of plausible values.
 
 ```{r}
 #| echo: false
@@ -382,6 +436,11 @@ summary_stats <- summary(model)
 library(broom.mixed)
 tidy_stats <- tidy(model, conf.int = TRUE)
 
+# Round all numeric columns to 3 decimal places
+library(dplyr)
+tidy_stats <- tidy_stats %>%
+  mutate(across(where(is.numeric), ~ round(., 3)))
+
 # Create a table of parameter estimates
 library(knitr)
 
@@ -390,6 +449,29 @@ tidy_stats %>%
 
 ```
 
+
+Main interpretation for this code focuses on 95% confidence interval. In general, if the credible interval does not include 0, the effect of the variable is statistically significant, indicating that the model is confident about the relationship. Most of the parameters have credible intervals excluding value 0, and some intervals are far from 0, suggesting that there's strong evidence supporting their effect on the violation outcome. For instance, the property type of "High Rise" has 95% CI of $[3.25, 10.45]$, showing that the model is confident about the significant effect of the increased contribution by high rise buildings to log-odds of violations.
+
+On the other hand, a few parameters have 95% confidence interval including 0, such as property types of "Group Home", "Group Home (VO)", "Nursing Home". This represents that the effect of the variables on violations is not statistically significant, and the relationship is uncertain. Further data collection may be needed to better understand their relationship with violations.
+
+@fig-95ci visualizes the parameter estimate values and their credible intervals for easier presentation.
+
+```{r}
+#| label: fig-95ci
+#| fig-cap: Parameter Estimates with 95% Credible Intervals
+#| echo: false
+#| warning: false
+#| message: false
+
+tidy_stats |>
+  ggplot(aes(x = term, y = estimate)) +
+  geom_point(size = 3, color = "red") +
+  geom_errorbar(aes(ymin = conf.low, ymax = conf.high), width = 0.2) +
+  coord_flip() +
+  labs(y = "Log-Odds Estimate",
+       x = "Parameter") +
+  theme_minimal()
+```
 
 
 ## Distribution of Predicted Probabilities
@@ -464,8 +546,313 @@ In other words, the properties whose initial observations have been made but fur
 
 # Appendix {-}
 
+# Surveys, Sampling, and Observational Data
 
-# Additional data details
+## Overview of the Idealized Fire Safety Resident Survey
+
+Fire safety inspections in residential buildings provide a critical mechanism for ensuring compliance with fire safety regulations. However, the dataset presenting inspection outcomes and analysis based on it only reflects the violation status before the enforcement procedure ends. It fails to provide information about whether buildings will maintain compliance or revert to unsafe practices after the inspection process ends. Since frequent routine inspections are often expensive and therefore impossible, it is necessary to explore alternative methods for monitoring the fire safety status of the properties and evaluating the long-term effectiveness of previous inspections.
+
+Introducing a resident survey fills these gaps by collecting the experiences and insights of those who are most directly affected by fire safety measures. Residents live in these buildings are familiar with the day-to-day reality of fire safety status, and could provide honest feedback and valuable perspective on whether inspections have resulted in improvements, or whether the properties conduct actions that violate regulations again. 
+
+This approach not only offers real-time updates of the violation status of the properties, but is also cost-effective. By incorporating resident surveys, the monitoring process becomes more sustainable, enhancing the overall understanding of fire safety compliance beyond the inspection period.
+
+The fire resident survey is designed to achieve the following objectives: 
+
+- Assess Perceived Changes After Inspections: Determine if residents have noticed any improvements or changes in fire safety measures after the inspection and enforcement procedure ends, offering valuable feedback on the effectiveness of the interventions made.
+
+- Identify Recurring Issues in Residential Buildings: Collect residents' observations and feedback on recurring violations of fire safety regulations in the properties, helping to highlight areas that may need further attention or action.
+
+- Improve Policies Related to Fire Safety: Provide down-to-earth perspective from residents to improve regulatory practices related to fire safety, ensuring that policies are better aligned with the needs and experiences of those directly affected. This can also guide more effective resource allocation to address ongoing safety concerns.
+
+- Arise Residents' Awareness of Fire Safety: Determine whether residents are aware that a fire safety inspection has taken place in their buildings, and to what extent residents recognizes the importance of fire safety. The survey, therefore, aimed to emphasize to residents that fire safety inspections are not just a property-level concern, but an issue that affects everyone living in the building. By highlighting the collective responsibility for fire safety, the survey sought to encourage residents to take an active role in the ongoing maintenance and improvement of fire prevention measures, and to promote voluntary compliance with fire safety regulations, ensuring that all residents contribute to maintaining a safe living environment for everyone in the building.
+
+
+
+## Survey
+
+This survey will be conducted using Google Forms, which is an effective platform for data collection. The survey can be accessed by the link, [Google Form Survey].
+
+
+
+### Survey Structure
+
+**Title:**
+
+Fire Safety Feedback Survey for Residential Properties in Toronto
+
+**Introduction:**
+
+We are conducting a survey to evaluate fire safety measures in your building following recent fire safety inspections conducted by Toronto Fire Services. 
+
+Your feedback will help us assess the effectiveness of inspections, identify any ongoing safety concerns, and improve fire safety standards.
+
+**Please note:**
+
+- Your answers will all be treated with complete confidentiality and anonymity.
+
+- Participation in this survey is voluntary.
+
+- We encourage you to provide honest and thoughtful responses.
+
+- The survey is estimated to take about 10 minutes to complete.
+
+- If you have any questions or concerns, feel free to contact [kylie.gu@mail.utoronto.ca](kylie.gu@mail.utoronto.ca)  (Yunkai Gu).
+
+Thank you for your valuable input. Your responses are essential for evaluating the outcomes and results of fire safety inspections by TFS.
+
+**Section 1: Residential Building Information**
+
+What is your city of residence?
+
+- Toronto
+
+- Other (End Survey)
+
+What is your address? (Please specify to street number)
+
+[Answer Box]
+
+What is the occupancy type of your residential property?
+
+- High Rise
+
+- Low Rise
+
+- Rooming House
+
+- Group Home
+
+- Group Home (VO)
+
+- Hotels and Motels
+
+- Detension
+
+- Hospital
+
+- Nursing Home
+
+- Residential Cares
+
+- Other [Answer Box]
+
+- Unsure
+
+What is your duration of residence? (Optional)
+
+- Less than 1 year
+
+- 1 to 3 years
+
+- 3 to 5 years
+
+- More than 5 years
+
+**Section 2: Awareness of Fire Safety Inspection**
+
+Were you aware that a fire safety inspection was recently conducted in your building?
+
+- Yes
+
+- No (Skip Next 2 Questions and Section 3)
+
+If so, please indicate the source of awareness if available: (Optional; Select All That Apply)
+
+- Notification from building management
+
+- Signs posted in the building
+
+- From neighbors/friends
+
+- Other [Answer Box]
+
+If so, please indicate the date of the inspection if available: (Optional; If you don't know, please leave the box blank.)
+
+[Answer Box]
+
+**Section 3: Improvements and Changes After Inspection**
+
+Have you observed any improvements in fire safety facilities? (Select All That Apply)
+
+- Fire alarms were tested or replaced.
+
+- Emergency exits were cleared or repaired.
+
+- Fire extinguishers were checked or replaced.
+
+- Sprinkler systems were serviced.
+
+- Other [answer box]
+
+- No noticeable changes.
+
+On a scale of 1 to 5, how effective do you think the changes have been in improving fire safety in your building?
+
+[Scale 1-5]
+
+Do you have any thoughts or suggestions regarding the fire safety inspection conducted by TFS? (Optional)
+
+[Answer Box]
+
+**Section 4: Current Fire Safety Conditions**
+
+On a scale of 1 to 5, how confident are you in your building’s current compliance with fire safety standards?
+
+[Scale 1-5]
+
+How is the fire alarm functionality in your building?
+
+- Fire alarms are always functional.
+
+- Fire alarms are sometimes not functional.
+
+- Fire alarms are often not functional.
+
+- Fire alarms are always not functional.
+
+- Unsure.
+
+- Other [Answer Box]
+
+Are the fire alarms in your building regularly tested?
+
+- Yes
+
+- No
+
+- Unsure
+
+How is the emergency exit accessibility in your building?
+
+- Emergency exits are always accessible.
+
+- Emergency exits are sometimes blocked or locked.
+
+- Emergency exits are often blocked or locked.
+
+- Emergency exits are always blocked or locked.
+
+- Unsure
+
+- Other [Answer Box]
+
+How is the fire extinguisher functionality in your building?
+
+- Fire extinguishers are always functional.
+
+- Fire extinguishers are sometimes not functional.
+
+- Fire extinguishers are often not functional.
+
+- Fire extinguishers are always not functional.
+
+- Unsure.
+
+- Other [Answer Box]
+
+Are fire extinguishers easily accessible and appear to be in working condition in your building?
+
+- Yes
+
+- No
+
+- Unsure
+
+How is the sprinkler system functionality in your building?
+
+- Sprinkler systems are always functional.
+
+- Sprinkler systems are sometimes not functional.
+
+- Sprinkler systems are often not functional.
+
+- Sprinkler systems are always not functional.
+
+- Unsure.
+
+- Other [Answer Box]
+
+Are the sprinkler systems in your building regularly maintained?
+
+- Yes
+
+- No
+
+- Unsure
+
+Have you noticed any fire safety concerns in your building?
+
+- Yes
+
+- No
+
+If so, please describe the fire safety concerns you noticed. (Optional)
+
+[Answer Box]
+
+**Section 5: Resident Experiences and Suggestions**
+
+Have you participated in any activities related to fire safety organized by the building management (e.g. a fire emergency preparedness training in your building)?
+
+- Yes
+
+- No
+
+Have you received any notifications from the building management regarding fire safety inspection and/or awareness?
+
+- Yes
+
+- No
+
+Do you have any suggestions for enhancing fire safety in your building? (Optional)
+
+ [Answer Box]
+ 
+**End Message:**
+
+Thank you for completing the Fire Safety Feedback Survey. Your responses will help us better evaluate the effectiveness of fire safety inspections by TFS, understand fire safety conditions in your residential building, and improve measures to protect residents like you.
+
+If you have any further questions or concerns, please feel free to contact [kylie.gu@mail.utoronto.ca](kylie.gu@mail.utoronto.ca).
+
+
+
+### Survey Design Considerations: Biases and Solutions
+
+The designing process of the survey has drawn from the guidance in the paper “How to Run Surveys” [@howtorunsurveys]. The following considerations address the potential biases in the proposed resident survey on fire safety compliance and suggest practical solutions:
+
+- Response Bias
+
+This type of bias occurs as respondents "try to take short cuts to minimize the cognitive load" [@howtorunsurveys]. They may also be natural consequences of how people process information based on the serial position of alternatives and their visual presentation. Typical bias includes: moderacy biases, extreme response biases, and response Order biases. In other words, respondents may consistently select moderate or extreme options, or may be influenced by the order in which options are presented.
+
+Stefanie Stantcheva suggests that randomizing the order of response options for questions with unordered (nominal) response options would be one of the solutions to the response biases. According to this recommendation, the fire safety feedback survey has been designed to randomly arrange the order of options for questions related to functionality and accessibility of fire safety facilities in the buildings in section 4. These questions followed a consistent and same structure and logic, making them particularly vulnerable to response biases due to the potential influence of the order in which options are presented. Randomizing the response options mitigates effects for such biases, enhancing the reliability of the data collected.
+
+Stefanie Stantcheva also recommends avoiding long response lists, as they can overwhelm respondents and introduce bias. Therefore, most of the survey questions do not require respondents to read through extensive lists of alternatives and choices, unless necessary. This approach aims to enhance the clarity and make respondents feel less stressful in completing the survey. 
+
+Balanced scales, such as a 5-point Likert scale with clear and evenly distributed options, could also help reduce the negative effects of the response bias by providing a range of numeric, direct choices to the respondents. In accordance with this principle, the survey includes several scaled questions, such as "On a scale of 1 to 5, how effective do you think the changes have been in improving fire safety in your building?"
+
+- Social Desirability Bias
+
+Social Desirability Bias (SDB) typically stems from the desire of respondents to avoid embarrassment and project a favorable image to others, resulting in respondents not revealing their actual attitudes [@howtorunsurveys]. Respondents may provide answers they believe are socially acceptable or align with what they perceive the surveyor expects.
+
+Stefanie Stantcheva suggests that by assuring respondents of complete anonymity in the survey, the social desirability biases could be mitigated, since emphasizing the confidentiality of responses would reduce pressure for the respondents to conform.
+
+According to this advice, the fire safety feedback survey has included special emphasis on anonymity at the beginning in the introduction section, clearly informing respondents that their answers "will all be treated with complete confidentiality and anonymity." This assurance is intended to encourage honest and open responses, helping to aviod situations where respondents provide socially desirable answers rather than their true opinions.
+
+This fire safety feedback survey also uses neutral wording and avoids leading questions. For instance, instead of asking, “Do you think the building is safer now?”, the survey asks, “Have you noticed any changes in safety measures?” This approach ensures that respondents are not influenced by biased or suggestive language, allowing them to provide more objective and accurate feedback based on their own observations and thoughts.
+
+- Attrition or Non-response Bias
+
+Not all residents will respond to the survey, and some may drop out midway, leading to missing data or biased outcomes. Attrition is a special case of non-response bias, which refers to the phenomenon of respondents dropping out of the study before completing it [@howtorunsurveys].
+
+As recommended by Stefanie Stantcheva, the fire safety feedback survey is designed to provide a smooth respondent experience, ensuring that the survey is visually clear and user-friendly to reduce dropout rates. The survey only includes only necessary, non-complex questions to keep it concise and short, ensuring that respondents do not feel overwhelmed or impatient while completing it. By focusing on essential topics, the survey aims to encourage accurate responses without causing respondents to drop out. 
+
+Stefanie Stantcheva also suggests the survey provide strong incentives for the respondents, in order to encourage respondents to complete the survey thoroughly and maximize participation. This could include offering a variety of possible rewards that appeal to a broad range of people, preventing not only attrition but also selection biases. 
+
+If budget allows, offering cash or gifts as rewards could motivate the audience to participate, ensuring that the response rate remains high throughout the survey process.
+
+
+
+# Additional data details {#sec-appx-data}
 
 # Model details {#sec-model-details}
 
@@ -517,7 +904,9 @@ Posterior distribution reflects updated beliefs about the parameters after obser
 
 posterior_vs_prior(model) +
   theme_minimal() +
-  theme(legend.position = "bottom") +
+  theme(legend.position = "bottom",
+        legend.text = element_text(size = 5)
+  ) +
   coord_flip()
 ```
 
@@ -557,7 +946,15 @@ If all chains appear to oscillate around the same mean, and overlap significantl
 #| label: fig-trace
 #| fig-cap: "Checking the Convergence of the MCMC Algorithm by Trace Plot"
 
-plot(model, "trace")
+plot(model, "trace") +
+    theme(
+          axis.text.x = element_text(size = 7),
+          axis.text.y = element_text(size = 5),
+          legend.title = element_text(size = 12),
+          legend.text = element_text(size = 10),
+          legend.position = "bottom",
+          strip.text = element_text(size = 6)
+    )
 ```
 
 
@@ -584,6 +981,7 @@ $\hat{R}$ is a diagnostic measure that compares the variance within each chain t
 
 plot(model, "rhat")
 ```
+
 
 
 \newpage
