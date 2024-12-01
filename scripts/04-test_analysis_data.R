@@ -1,69 +1,111 @@
 #### Preamble ####
-# Purpose: Tests... [...UPDATE THIS...]
-# Author: Rohan Alexander [...UPDATE THIS...]
-# Date: 26 September 2024 [...UPDATE THIS...]
-# Contact: rohan.alexander@utoronto.ca [...UPDATE THIS...]
+# Purpose: Tests the structure and validity of the fire inspection outcome 
+  # dataset after cleaning.
+# Author: Yunkai Gu
+# Date: 1 December 2024
+# Contact: kylie.gu@mail.utoronto.ca
 # License: MIT
-# Pre-requisites: [...UPDATE THIS...]
-# Any other information needed? [...UPDATE THIS...]
+# Pre-requisites: 
+# - The `tidyverse` package must be installed and loaded
+# - 02-download_data.R and 03-clean_data.R must have been run
+# Any other information needed? Make sure you are in the `Toronto_Fire_Inspection` rproj
 
 
 #### Workspace setup ####
 library(tidyverse)
-library(testthat)
 
-data <- read_csv("data/02-analysis_data/analysis_data.csv")
+
+# Read the dataset
+analysis_data <- read_parquet("data/02-analysis_data/fire_cleaned_data.parquet")
 
 
 #### Test data ####
-# Test that the dataset has 151 rows - there are 151 divisions in Australia
-test_that("dataset has 151 rows", {
-  expect_equal(nrow(analysis_data), 151)
-})
 
-# Test that the dataset has 3 columns
-test_that("dataset has 3 columns", {
-  expect_equal(ncol(analysis_data), 3)
-})
+# Test if the data was successfully loaded
+if (exists("analysis_data")) {
+  message("Test Passed: The dataset was successfully loaded.")
+} else {
+  stop("Test Failed: The dataset could not be loaded.")
+}
 
-# Test that the 'division' column is character type
-test_that("'division' is character", {
-  expect_type(analysis_data$division, "character")
-})
+# Check if the dataset has 13193 rows
+if (nrow(analysis_data) == 13193) {
+  message("Test Passed: The dataset has 13193 rows.")
+} else {
+  stop("Test Failed: The dataset does not have 13193 rows.")
+}
 
-# Test that the 'party' column is character type
-test_that("'party' is character", {
-  expect_type(analysis_data$party, "character")
-})
+# Check if the dataset has 5 columns
+if (ncol(analysis_data) == 5) {
+  message("Test Passed: The dataset has 5 columns.")
+} else {
+  stop("Test Failed: The dataset does not have 5 columns.")
+}
 
-# Test that the 'state' column is character type
-test_that("'state' is character", {
-  expect_type(analysis_data$state, "character")
-})
+# Check if the 'property_type' column contains only valid property types
+valid_types <- c("High Rise",
+                 "Low Rise",
+                 "Detention",
+                 "Group Home",
+                 "Group Home (VO)",
+                 "Hospital",
+                 "Hotel & Motel",
+                 "Nursing Home",
+                 "Residential Care",
+                 "Rooming House")
 
-# Test that there are no missing values in the dataset
-test_that("no missing values in dataset", {
-  expect_true(all(!is.na(analysis_data)))
-})
+if (all(analysis_data$property_type %in% valid_types)) {
+  message("Test Passed: The 'property_type' column contains only valid property types.")
+} else {
+  stop("Test Failed: The 'property_type' column contains invalid property types.")
+}
 
-# Test that 'division' contains unique values (no duplicates)
-test_that("'division' column contains unique values", {
-  expect_equal(length(unique(analysis_data$division)), 151)
-})
+# Check if the 'inspections_opendate' column contains only valid dates
+valid_opendate <- seq(as.Date("2019-07-09"), as.Date("2024-11-20"), by = "day")
 
-# Test that 'state' contains only valid Australian state or territory names
-valid_states <- c("New South Wales", "Victoria", "Queensland", "South Australia", "Western Australia", 
-                  "Tasmania", "Northern Territory", "Australian Capital Territory")
-test_that("'state' contains valid Australian state names", {
-  expect_true(all(analysis_data$state %in% valid_states))
-})
+if (all(analysis_data$inspections_opendate %in% valid_opendate)) {
+  message("Test Passed: The 'inspections_opendate' column contains only valid open dates.")
+} else {
+  stop("Test Failed: The 'inspections_opendate' column contains invalid open dates.")
+}
 
-# Test that there are no empty strings in 'division', 'party', or 'state' columns
-test_that("no empty strings in 'division', 'party', or 'state' columns", {
-  expect_false(any(analysis_data$division == "" | analysis_data$party == "" | analysis_data$state == ""))
-})
+# Check if the 'inspections_closeddate' column contains only valid dates
+valid_closeddate <- seq(as.Date("2024-01-02"), as.Date("2024-11-28"), by = "day")
 
-# Test that the 'party' column contains at least 2 unique values
-test_that("'party' column contains at least 2 unique values", {
-  expect_true(length(unique(analysis_data$party)) >= 2)
-})
+if (all(analysis_data$inspections_closeddate %in% valid_closeddate)) {
+  message("Test Passed: The 'inspections_closeddate' column contains only valid closed dates.")
+} else {
+  stop("Test Failed: The 'inspections_closeddate' column contains invalid closed dates.")
+}
+
+# Check if the 'date_num' column contains only valid numbers
+valid_date <- c(0:1679)
+
+if (all(analysis_data$date_num %in% valid_date)) {
+  message("Test Passed: The 'date_num' column contains only valid numbers.")
+} else {
+  stop("Test Failed: The 'date_num' column contains invalid numbers.")
+}
+
+# Check if the 'violation' column contains only 0 and 1
+valid_violation <- c(0,1)
+
+if (all(analysis_data$violation %in% valid_violation)) {
+  message("Test Passed: The 'violation' column contains only 0 and 1.")
+} else {
+  stop("Test Failed: The 'violation' column contains intergers other than 0 and 1.")
+}
+
+# Check if there are any missing values in the dataset
+if (all(!is.na(analysis_data))) {
+  message("Test Passed: The dataset contains no missing values.")
+} else {
+  stop("Test Failed: The dataset contains missing values.")
+}
+
+# Check if there are no empty strings in 'property_type' column
+if (all(analysis_data$property_type != "")) {
+  message("Test Passed: There are no empty strings in 'property_type' column.")
+} else {
+  stop("Test Failed: There are empty strings in 'property_type' column.")
+}
