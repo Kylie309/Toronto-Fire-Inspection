@@ -4,8 +4,10 @@
 # Date: 1 December 2024
 # Contact: kylie.gu@mail.utoronto.ca
 # License: MIT
-# Pre-requisites: Downloaded raw data from Open Data Toronto
-# Any other information needed? None
+# Pre-requisites:
+# - The `tidyverse` `dplyr` `lubridate` package must be installed and loaded
+# - 02-download_data.R must have been run
+# Any other information needed? Make sure you are in the `Toronto_Fire_Inspection` rproj
 
 #### Workspace setup ####
 library(tidyverse)
