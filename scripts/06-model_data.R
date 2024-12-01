@@ -4,8 +4,10 @@
 # Date: 28 November 2024
 # Contact: kylie.gu@mail.utoronto.ca
 # License: MIT
-# Pre-requisites: Downloaded and cleaned data.
-# Any other information needed? None
+# Pre-requisites:
+# - The `tidyverse` `lubridate` `rstanarm` package must be installed and loaded
+# - 02-download_data.R and 03-clean_data.R must have been run
+# Any other information needed? Make sure you are in the `Toronto_Fire_Inspection` rproj
 
 
 #### Workspace setup ####
