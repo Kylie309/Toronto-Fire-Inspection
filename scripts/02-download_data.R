@@ -1,7 +1,7 @@
 #### Preamble ####
 # Purpose: Downloads and saves the data from Open Data Toronto (https://open.toronto.ca/dataset/highrise-residential-fire-inspection-results/)
 # Author: Yunkai Gu
-# Date: 21 November 2024
+# Date: 28 November 2024
 # Contact: kylie.gu@mail.utoronto.ca
 # License: MIT
 # Pre-requisites: Installed `tidyverse` package
@@ -18,5 +18,3 @@ raw_data <- read_csv("https://ckan0.cf.opendata.inter.prod-toronto.ca/dataset/f8
 
 #### Save data ####
 write_csv(raw_data, "data/01-raw_data/fire_raw_data.csv") 
-
-         
