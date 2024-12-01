@@ -4,8 +4,8 @@
 # Date: 28 November 2024
 # Contact: kylie.gu@mail.utoronto.ca
 # License: MIT
-# Pre-requisites: Installed `tidyverse` package
-# Any other information needed? None
+# Pre-requisites: The `tidyverse` package must be installed and loaded
+# Any other information needed? Make sure you are in the `Toronto_Fire_Inspection` rproj
 
 
 #### Workspace setup ####
