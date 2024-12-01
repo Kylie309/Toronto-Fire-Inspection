@@ -45,7 +45,7 @@ if (ncol(analysis_data) == 5) {
 # Check if the 'property_type' column contains only valid property types
 valid_types <- c("High Rise",
                   "Low Rise",
-                  "Detension",
+                  "Detention",
                   "Group Home",
                   "Group Home (VO)",
                   "Hospital",
