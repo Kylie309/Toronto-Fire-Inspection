@@ -1,12 +1,12 @@
 ---
-title: "Fire Safety Regulation Violations in Toronto: Analysis by Property Type and Inspection Duration for Inspections Closed in 2024"
-subtitle: "My subtitle if needed"
+title: "Fire Safety Regulation Violations in Toronto Residential Properties: Analysis by Property Type and Inspection Duration"
+subtitle: "Most properties would have a high probability of violation, whereeas high-rise buildings, rooming houses, and group homes have the highest risk"
 author: 
   - Yunkai Gu
 thanks: "Code and data are available at: [https://github.com/Kylie309/Toronto-Fire-Inspection](https://github.com/Kylie309/Toronto-Fire-Inspection)."
 date: today
 date-format: long
-abstract: "First sentence. Second sentence. Third sentence. Fourth sentence."
+abstract: "This paper analyzes fire safety regulation violations in residential properties across Toronto, predicting the likelihood of violations based on the inspection duration and property type. By using a Bayesian logistic regression model, the study finds that property type plays a significant role in predicting violations, with high-rise buildings, rooming houses, and group homes at higher risk, and predicts with high confidence that most properties in the city would have a high probability of being observed to have a violation of fire safety regulations. These findings are important for improving fire safety protocols, as they suggest that targeting inspections towards high-risk property types could lead to more effective resource allocation and better safety outcomes. Findings in the study would motivate targeted inspections and interventions concentrated on properties that present the greatest risk, enhancing the effectiveness of fire safety efforts and helping to reduce potential fire accidents more efficiently."
 format: pdf
 number-sections: true
 toc: true
@@ -48,21 +48,35 @@ data <- read_csv(
 
 # Introduction
 
-Overview paragraph
+In recent years, fire safety inspections in residential buildings have gained increasing attention from the public due to their role in ensuring the safety of residents and reducing potential dangers caused by fire-related accidents. Toronto Fire Services (TFS) fire prevention and enforcement strategies, which are guided by the Fire Protection and Prevention Act, 1997 (FPPA) and regulations under it (such as Ontario Fire Code), aim to increase public safety and awareness [@fire_info]. In order to achieve this goal, TFS have been conducting inspections across a wide range of residential properties within the entire city to ensure properties' compliance with fire safety regulations. However, despite these efforts, there remains a limited understanding of the factors influencing the likelihood of fire safety violations across different property types and inspection durations. As a result, targeted interventions have not yet been effectively implemented for high-risk buildings. Therefore, this paper aims to analyze the impact of both inspection time interval and property type on the likelihood of violations in fire safety checks. By doing so, a model that provides predictions of violations based on specific features of the properties and inspection characteristics could be developed, improving TFS's ability to prioritize resources and focus on properties that require the most attention.
 
-Estimand paragraph
+The focus of this study is to investigate how different property types and inspection time intervals contribute to fire safety violations in Toronto, and this paper uses Bayesian logistics model to conduct predictions. The predictor variables examined include the time interval of the inspection process, and the type of property being inspected. By exploring these factors, the paper aims to predict the likelihood of violations, conducting predictions of which property types are at higher risk for violations and how inspection duration might influence these outcomes. The estimand would be described in detail in @sec-estimand.
 
-Results paragraph
+As included at the end of the analysis, the model predicts with high confidence that most properties would have a high probability of being observed to have a violation of fire safety regulations. Such prediction by the model is confident, highlighting the utility of the model in helping to conduct targeted inspections and interventions where they are most needed. Moreover, the analysis further highlights that different property types have varying impacts on the likelihood of fire safety violations. The model confidently predicts that among ten property types inspected, "High Rise," "Rooming House," and "Group Home" are more likely to have violations. As a result, these property types should receive more targeted inspections and interventions. Along with "Low Rise" and "Hotel & Motel," these property types show strong evidence of being associated with higher risks of violations. In contrast, the model indicates that "Nursing Home" has the lowest risk of violations among ten property types inspected and some uncertainty exist in the strength of this predicted relationship.
 
-Why it matters paragraph
+This research contributes to improving fire safety facilities in residential buildings in Toronto by providing empirical evidence and statistical predictions that supports the allocation of inspection resources based on both the property type and inspection time interval. By highlighting which property types with how long inspection duration are most at risk for fire safety violations, the findings offer a valuable approach to prioritizing inspections and interventions. The results of the study have broader implications for fire safety policy, as they could be used to improve future regulatory practices and resource allocation strategies. By ensuring that inspection resources are concentrated on properties that present the greatest risk, this study would enhance the effectiveness of fire safety efforts, and help to reduce potential fire accidents more efficiently.
 
-Telegraphing paragraph: The remainder of this paper is structured as follows. @sec-data....
+The remainder of this paper is structured as follows: 
+
+@sec-data introduces the overview of the data (@sec-data-overview) and measurement (@sec-data-measure), as well as explanations, descriptions, table and graph summaries of outcome (@sec-data-outcome) and predictor variables (@sec-data-predictor) of the study. @sec-model explains the modeling process in detail, including procedure of model set-up (@sec-model-set), model assumptions and limitations (@sec-model-assume), and model justification (@sec-model-justify). Then, @sec-result presents the model outcome and results by tables and plots, and @sec-discussion discusses the study in a broader context. 
+
+Appendix includes three parts:[Appendix -@sec-appx-survey] describes detailed idealized sampling methodology and survey designed for residents to collect fire safety feedback; [Appendix -@sec-appx-data] provides additional data details; [Appendix -@sec-model-details] presents additional details during modeling process, including posterior predictive check [Appendix -@sec-ppc], comparison between posterior and prior distributions [Appendix -@sec-pvp], and diagnostics [Appendix -@sec-diagnostics].
+
+
+
+## Estimand {#sec-estimand}
+
+The estimand in this paper is the probability of a fire safety violation occurring in residential properties in Toronto, based on two primary factors: inspection duration (measured as the time interval between the start and end of the inspection process) and property type (such as high-rise, low-rise, group home, etc., a total of ten types). The goal of the analysis is to evaluate how these factors influence the likelihood of a violation being detected during fire safety inspections.
+
+Specifically, the estimand is modeled as the probability that a property will fail the fire safety inspection (i.e., a violation is found) based on these two predictors. The response variable is binary: a violation is either observed (1) or not observed (0). This probability is expressed as a function of the inspection time interval and the property type, with the logistic regression model used to predict the outcome, estimating the log-odds of a violation for different values of these predictors.
+
+The estimand, therefore, directly addresses the question: "What is the likelihood of a violation being observed during the inspection process for a given property, based on its property type and the duration of the inspection?" By understanding the prediction results of the study, identifying which properties are at higher risk of violations would be possible, and the conclusions could be used for guiding TFS to conduct more targeted inspections and interventions to residential properties.
 
 
 
 # Data {#sec-data}
 
-## Overview
+## Overview {#sec-data-overview}
 
 This paper uses Highrise Residential Fire Inspection Results dataset obtained from Open Data Toronto as the main source of data [@fire_data]. The portal is launched by City of Toronto to meet growing demand for open data. The raw dataset presents information of properties where Inspectors from Toronto Fire Services (TFS) have examined on, as well as whether the properties violated fire safety regulations and the details of violations if so.
 
@@ -80,7 +94,7 @@ Following @tellingstories, this paper uses Bayesian modeling to predict the pass
 
 
 
-## Measurement {#sec-measure}
+## Measurement {#sec-data-measure}
 	
 The dataset captures data related to the results of fire safety inspections conducted by Toronto Fire Services (TFS) within highrise residential buildings, which is guided by the Fire Protection and Prevention Act, 1997 (FPPA) and regulations under the FPPA, like the Ontario Fire Code [@fire_info]. It indicates properties where violations have been found by an Inspector which are required to be fixed for compliance at the time with the Ontario Fire Code as well as properties with no observable violations [@fire_data].
 
@@ -92,7 +106,7 @@ Note that this dataset only includes 'closed' cases, which are cases whose inspe
 
 
 
-## Outcome Variable
+## Outcome Variable {#sec-data-outcome}
 
 ### Violation
 
@@ -141,7 +155,7 @@ data |>
 
 
 
-## Predictor Variables
+## Predictor Variables {#sec-data-predictor}
 
 ### Inspection Time Interval
 
@@ -290,7 +304,7 @@ data |>
 
 
 
-# Model
+# Model {#sec-model}
 
 The goal of the modelling strategy is twofold. 
 
@@ -306,7 +320,7 @@ Background details and diagnostics of the model are included in [Appendix -@sec-
 
 
 
-## Model set-up
+## Model set-up {#sec-model-set}
 
 The Bayesian model was implemented using the R programming language [@citeR], specifically utilizing the `rstanarm` package of @citerstanarm. This package provides an interface for fitting Bayesian regression models using Stan, and the models are fit using the package.
 
@@ -340,7 +354,7 @@ where:
 Formula (2), (3) and (4) specifies priors for the model. This prior reflects the assumption that coefficients are centered around 0, with a standard deviation of 2.5, allowing moderate variability while discouraging extreme values.
 
 
-## Model Assumptions and Limitations
+## Model Assumptions and Limitations {#sec-model-assume}
 
 The main, underlying assumptions and their limitations for the Bayesian model is discussed below:
 
@@ -358,7 +372,7 @@ Also, if new property_type levels are introduced, the model may not be no longer
 
 
 
-## Model Justification
+## Model Justification {#sec-model-justify}
 
 Since the response variable is binary for each case and follows a Bernoulli distribution, it would be appropriate to use Bayesian logistic regression model to estimate it. 
 
@@ -378,7 +392,7 @@ Therefore, after considering many alternatives, the final model of Bayesian logi
 
 
 
-# Results
+# Results {#sec-result}
 
 ## Model Summary
 
@@ -418,6 +432,7 @@ modelsummary::modelsummary(
 ```
 
 
+
 ## Posterior Parameter Estimates
 
 @tbl-posteriorestimate shows more detailed information about the coefficients of each parameter. Column "Estimate" presents the mean posterior estimate for the effect of each parameter on the log-odds of the outcome (violation); "Std.Error" presents the standard deviationor the uncertainty in the estimate; "Conf.Low" and "Conf.High" are the lower and upper bounds of the 95% credible interval for the parameter, showing the range of plausible values.
@@ -452,7 +467,7 @@ tidy_stats %>%
 
 Main interpretation for this code focuses on 95% confidence interval. In general, if the credible interval does not include 0, the effect of the variable is statistically significant, indicating that the model is confident about the relationship. Most of the parameters have credible intervals excluding value 0, and some intervals are far from 0, suggesting that there's strong evidence supporting their effect on the violation outcome. For instance, the property type of "High Rise" has 95% CI of $[3.25, 10.45]$, showing that the model is confident about the significant effect of the increased contribution by high rise buildings to log-odds of violations.
 
-On the other hand, a few parameters have 95% confidence interval including 0, such as property types of "Group Home", "Group Home (VO)", "Nursing Home". This represents that the effect of the variables on violations is not statistically significant, and the relationship is uncertain. Further data collection may be needed to better understand their relationship with violations.
+On the other hand, two parameters have 95% confidence interval including 0, which are property types of "Group Home (VO)" and "Nursing Home". This represents that the effect of the variables on violations is not statistically significant, and the relationship is uncertain. Further data collection may be needed to better understand their relationship with violations.
 
 @fig-95ci visualizes the parameter estimate values and their credible intervals for easier presentation.
 
@@ -472,6 +487,7 @@ tidy_stats |>
        x = "Parameter") +
   theme_minimal()
 ```
+
 
 
 ## Distribution of Predicted Probabilities
@@ -507,7 +523,17 @@ ggplot(
 
 
 
-# Discussion
+### Conclusion
+
+The results of the Bayesian logistic regression model indicates that the duration of the inspection has a negligible impact on the likelihood of violations, whereas the predictor variable of property type plays a more significant role in determining violations. The model predicts with high confidence that most properties would have a high probability of being observed to have a violation of fire safety regulations, shown by the distribution of predicted probabilities. Such prediction by the model in identifying properties at high risk of violations is confident, highlighting the utility of the model in helping to conduct targeting inspections and interventions where they are most needed.
+
+The analysis further highlights that property types have varying impacts on the likelihood of fire safety violations. Among the property types, "High Rise", "Rooming House" and "Group Home" have the highest risk of violations compared to the reference property type, shown by the large, positive coefficients. These property types are followed by "Low Rise" and "Hotel & Motel," which also show relatively high risks of violations. For these five property types, there is strong evidence supporting their relationship with the likelihood of violations, as their 95% confidence intervals do not include zero, suggesting a statistically significant impact. 
+
+On the other hand, "Nursing Home" shows the smallest coefficient with confidence interval including zero, suggesting a relatively lowest risk of violations and some uncertainty regarding the strength of the relationship. Despite this, "Nursing Home" still demonstrates a positive, though weaker, risk of violations compared to other property types.
+
+
+
+# Discussion {#sec-discussion}
 
 ## What is done in this paper? 
 
@@ -928,7 +954,7 @@ If budget allows, offering cash or gifts as rewards could motivate the audience 
 
 # Model details {#sec-model-details}
 
-## Posterior Predictive Check
+## Posterior Predictive Check {#sec-ppc}
 
 During the modeling process, posterior predictive checks (PPC) is used.
 
@@ -958,7 +984,7 @@ pp_check(model) +
 The plot shows that the curves for $y$ (observed data) and $y_rep$ (posterior predictive distribution) align closely with each other, suggesting that the fix effects of two predictor variables capture the overall pattern of the observed data well, and the Bayesian model generates predictions consistent with the observed data. Lack of mismatches between curves mean that the model provides good fit of data. Near extreme probabilities of 0 and 1, two curves tightly follow each other, indicating that the model correctly predicts extreme outcomes.
 
 
-## Posterior vs Prior
+## Posterior vs Prior {#sec-pvp}
 
 Comparing the posterior distribution with the prior one is also necessary for model validation. It examines how the model fits and is affected by the data.
 
@@ -1000,7 +1026,7 @@ On the other hand, the point representing 'Nursing Home' (prprty_NH) have poster
 The rest of dots representing different levels of 'property type' show various posterior means and credible intervals. Most of the points are close to 0 or above 0, providing information about effects of different property types respectively.
 
 
-## Diagnostics
+## Diagnostics {#sec-diagnostics}
 
 ### Trace Plot
 
