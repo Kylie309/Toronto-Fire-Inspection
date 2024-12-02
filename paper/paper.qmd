@@ -556,7 +556,7 @@ Introducing a resident survey fills these gaps by collecting the experiences and
 
 This approach not only offers real-time updates of the violation status of the properties, but is also cost-effective. By incorporating resident surveys, the monitoring process becomes more sustainable, enhancing the overall understanding of fire safety compliance beyond the inspection period.
 
-The fire resident survey is designed to achieve the following objectives: 
+The fire resident survey is designed to achieve the following objectives:
 
 - Assess Perceived Changes After Inspections: Determine if residents have noticed any improvements or changes in fire safety measures after the inspection and enforcement procedure ends, offering valuable feedback on the effectiveness of the interventions made.
 
@@ -568,9 +568,81 @@ The fire resident survey is designed to achieve the following objectives:
 
 
 
+## Sampling Approach
+
+### Target Population
+
+Target population refers to the population of the survey's interest. The target population for this fire safety feedback survey includes all residents of residential buildings in Toronto that have undergone fire safety inspections within the last 12 months, varying in property type and geographic location within the city.
+
+This diverse target population ensures a broad range of perspectives on fire safety measures, reflecting various living conditions across different areas of the city.
+
+
+
+### Sampling Frame
+
+The sampling frame or pool of potential respondents represents all the people in the population potentially to be sampled and invited to the survey [@howtorunsurveys]. In this research, the sampling frame will be based on a list of properties from inspection records. The survey will be distributed by contacting the building management or tenant associations of those properties, who will then send the surveys to the residents for completion. 
+
+This process will be carried out in full compliance with privacy laws to ensure that residents' personal information is protected and that their participation remains confidential.
+
+
+
+### Stratified Random Sampling
+
+To ensure the survey on fire safety compliance gathers reliable and representative data, a stratified random sampling method will be employed. The sampling approach follows the guidelines in "Survey Methodology" [@surveymethodology].
+
+This approach divides the frame of population elements into meaningful subgroups, or "strata", which are "mutually exclusive groups of elements on a sampling frame" [@surveymethodology]. Then, separate samples are drawn from each stratum, using randomization techniques (e.g. random number generators) to select participants within each stratum.
+
+The strata for this study will include the following categories:
+
+- Region: The geographic address of the property, ensuring representation from different areas within Toronto.
+
+- Property Type: The occupancy type of the property, which includes various categories such as high-rise, low-rise, detention, group homes, group homes for vulnerable individuals (VO), hospitals, hotels & motels, nursing homes, residential care, and rooming houses.
+
+This study plans to mount a survey collecting feedback of fire safety inspection of properties and expect that the results vary across different property types and regions in Toronto. Therefore, the strata will be defined based on key characteristics relevant to building types and location information. 
+
+
+
+### Planned Sample and Sample Size
+
+The planned or target sample is all the people that ideally to be included to complete the survey [@howtorunsurveys].  
+
+The sample size should be determined by both considering to achieve statistical significance and to meet resource constraints. After obtaining information about sample frame size, or the total number of residents across all strata, the proportion of the planned sample size allocated to each stratum should match the proportion of that stratum in the overall target population. 
+
+This approach ensures proportional representation from each stratum, reflecting the diversity of the population and improving the generalizability of the survey results. By maintaining this balance, the sample could provide a complete overview while meeting the constraints of available resources.
+
+
+
+### Potential Errors
+
+- Coverage Error
+
+Coverage error is the difference between the potential pool of respondents and the target population [@howtorunsurveys]. In other words, the sampling frame does not fully represent the target population.
+
+In this research, the surveys will be distributed to residents using online Google Forms. However, since the recruitment relies on digital methods, there is a potential risk of underrepresentation for properties in regions or with property types where a majority of residents lack internet access or digital literacy. This could result in skewed data, with certain populations being less likely to participate.
+
+Additionally, since the sampling frame is based solely on official building management contact information, residents in informal or unregistered housing arrangements may be excluded from the survey. This limitation could further affect the representativeness of the sample, as it excludes individuals living in non-official housing setups who may also be affected by fire safety measures.
+
+- Sampling Error
+
+Sampling error refers to the difference between the planned sample and the sampling frame, that is, "the fact that you are drawing only a sample from the full sampling frame" [@howtorunsurveys]. 
+
+In this research, despite randomization, it may still be possible that the selected individuals within a stratum do not represent the overall stratum accurately. This could occur due to certain individuals being overrepresented or underrepresented by chance. As a result, while randomization aims to minimize bias, sampling error could still influence the accuracy and precision of the findings.
+
+- Non-response Error
+
+Non-response error refers to the differences between the target sample and the actual sample [@howtorunsurveys]. 
+
+In this research, the error could arise due to the residents not receiving or seeing the invitation of the survey. Since the surveys are distributed by building management or tenant associations through online platforms such as emails, there is a risk that the survey invitations may be overlooked or filtered into spam folders. Email-based distribution depends on residents regularly checking their inboxes, and not every resident has such habit. If the email is sent from an unfamiliar address or lacks clear identification, residents might dismiss it as junk or advertising mail, and ignore it entirely. Furthermore, some email systems automatically filter certain messages into spam folders, reducing the visibility of the survey and limiting participation.
+
+Additionally, residents may ignore the survey invitation, potentially due to the lack of immediate rewards or incentives for participation. Without clear incentives, such as gift cards or other tangible rewards, residents may not feel motivated to take the time to complete the survey. This lack of incentive could result in lower response rates, particularly among residents who do not understand the survey’s importance. As a result, the data collected might not fully capture the perspectives of all residents, leading to potential bias in the findings. 
+
+More detailed discussion and potential solutions would be discussed in @sec-survey-bias.
+
+
+
 ## Survey
 
-This survey will be conducted using Google Forms, which is an effective platform for data collection. The survey can be accessed by the link, [Google Form Survey].
+This survey will be conducted using Google Forms, which is an effective platform for data collection. It can be accessed by this link: [Google Form Survey](https://forms.gle/SMaPsDLVG1v33Ecy9).
 
 
 
@@ -816,7 +888,7 @@ If you have any further questions or concerns, please feel free to contact [kyli
 
 
 
-### Survey Design Considerations: Biases and Solutions
+### Survey Design Considerations: Biases and Solutions {#sec-survey-bias}
 
 The designing process of the survey has drawn from the guidance in the paper “How to Run Surveys” [@howtorunsurveys]. The following considerations address the potential biases in the proposed resident survey on fire safety compliance and suggest practical solutions:
 
