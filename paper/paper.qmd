@@ -523,7 +523,7 @@ ggplot(
 
 
 
-### Conclusion
+## Conclusion
 
 The results of the Bayesian logistic regression model indicates that the duration of the inspection has a negligible impact on the likelihood of violations, whereas the predictor variable of property type plays a more significant role in determining violations. The model predicts with high confidence that most properties would have a high probability of being observed to have a violation of fire safety regulations, shown by the distribution of predicted probabilities. Such prediction by the model in identifying properties at high risk of violations is confident, highlighting the utility of the model in helping to conduct targeting inspections and interventions where they are most needed.
 
@@ -535,34 +535,69 @@ On the other hand, "Nursing Home" shows the smallest coefficient with confidence
 
 # Discussion {#sec-discussion}
 
-## What is done in this paper? 
+## Overview of the Paper 
 
-If my paper were 10 pages, then should be be at least 2.5 pages. The discussion is a chance to show off what you know and what you learnt from all this. 
+This paper investigates the factors that influence fire safety violations in residential buildings in Toronto, with a particular focus on the role of property type and inspection duration. The central aim is to predict the likelihood of violations, conducting predictions of which property types are at higher risk for violations and how inspection duration might influence these outcomes. The paper uses a Bayesian logistic regression model to analyze data from properties that underwent fire safety inspections by Toronto Fire Services (TFS). The raw dataset is obtained from Open Data Toronto, and a data cleaning process is performed to retain only inspection cases with a closed date within 2024, ensuring that the data reflects the most recent developments and provides an up-to-date basis for analysis. By focusing on the inspection outcomes of the properties where the inspection process was completed in 2024, the study uses a binary outcome variable to indicate whether a violation was observed (1) or not observed (0), facilitating a clear distinction between properties that violated fire safety regulations and those that did not.
 
-## What is something that we learn about the world? 
+The analysis includes two main predictor variables: the inspection time interval and property type. The inspection time interval refers to the duration between the start and end date of the inspection, and property type includes ten categories, such as high-rise buildings, low-rise buildings, group homes, and others. These two variables were selected based on their potential to influence the outcome of fire safety inspections. The inspection duration was expected to be a relevant predictor since longer inspections might allow for more thorough checks, potentially leading to more cases with violations being detected. Similarly, different property types were assumed to have varying levels of probability of violating fire safety regulations, as the unique features and characteristics of the occupancy types may lead to more or less additional safety concerns.
 
-Please don't use these as sub-heading labels - change them to be what your point actually is.
+The study employs a Bayesian logistic regression model to analyze the data, allowing for the prediction of the likelihood of violations and considering uncertainty around the estimates at the same time. The results of the model are stated as follows: the model predicts with high confidence that most properties would have a high probability of being observed to have a violation of fire safety regulations; Different property types have varying impacts on the likelihood of fire safety violations; Duration of the inspection has a negligible impact on the likelihood of violations; Among ten property types inspected, "High Rise," "Rooming House," and "Group Home" are more likely to have violations and therefore should receive more targeted inspections and interventions.
 
-## What is another thing that we learn about the world? 
+Overall, the paper identifies the role of property type as a key factor influencing fire safety regulation violation status in Toronto. The findings of the study could then be used to motivate targeted inspections and interventions, allowing fire prevention resources to be concentrated on properties that present the highest risk. Prioritizing high-risk buildings enhances the effectiveness of fire safety efforts, and helps to reduce potential fire accidents more efficiently.
 
 
-## Weaknesses and next steps
 
-Firstly, the limitations in the process of measurement of the original dataset should be considered. Specifically, the limitations include:
+## Varying Possibility of Violation for Different Property Types
+
+One of the key lessons from this study is that property type plays an important role in determining the likelihood of fire safety violations. The findings show that property types of high-rise buildings, group homes, and rooming houses have a significantly higher possibility of violations compared to other types. This finding highlights the importance of property characteristics in influencing fire safety outcomes, rather than assuming all properties face the same risks.
+
+In the real world, such result could assist Toronto Fire Services and other fire safety authorities in prioritizing their efforts and allocating the fire prevention resources more efficiently. Properties with higher risk of violation would require more frequent, careful and thorough inspections, as well as more targeted fire safety interventions. For instance, high-rise buildings typically have more complex layouts and higher occupancy, presenting unique fire safety challenges. One example of such difficulties is that extra actions would be needed to ensure that fire safety measures are effective across multiple floors. Authorities could focus on addressing these challenges by conducting more frequent maintenance of fire safety equipment, such as alarms, sprinklers, and fire exits, testing that they are functioning properly throughout the building, and implementing enhanced systems preventing fire accidents. 
+
+By focusing on high-risk property types, Toronto Fire Services could allocate resources more effectively, ensuring that inspections are concentrated in areas where they are most needed. This would help protect the residents living in those properties from fire-related dangers. Additionally, this targeted approach would motivate the city to consider fire safety regulations targeted specifically to these property types. Furthermore, there is potential to arise the residents' awareness of fire safety issues, encouraging greater public attention to fire prevention. This heightened awareness could lead to more voluntary fire safety practices, both within buildings and in the community, reducing the risk of fire-related incidents across Toronto.
+
+
+
+## Limited Role of Inspection Duration in Predicting Violations
+
+Another key learning from this paper is that inspection duration — the time interval between the start date and the closed date of the inspection — does not significantly affect the likelihood of fire safety violations found in properties. While it is expected that longer inspections lead to more thorough checks and thus a higher probability of identifying violations, the findings of this study challenge this idea. The study suggests that the duration of the inspection has a negligible impact on the detection of violations.
+
+In practical terms, this finding is valuable for fire safety management and resource allocation. Toronto Fire Services may reconsider the emphasis placed on inspection duration. If longer inspections are not significantly improving the detection of violations, resources could be better spent on other aspects of the inspection process, such as using advanced fire safety technologies, improving inspector training, or focusing on properties with higher violation risks. This could make the inspection process be more cost-effective by reducing the time spent on inspections, while still maintaining the quality of fire safety prevention procedure.
+
+As stated before, the study’s findings further suggest that the key to effective fire safety inspections lies in targeting high-risk properties rather than increasing inspection time. Fire safety inspections could be made more efficient by focusing on properties with higher violation risks, based on their property type or past inspection records. This targeted approach could lead to better outcomes, encouraging fire safety authorities to shift their focus from inspection duration to more strategic inspection methodologies.
+
+
+
+## Weaknesses and Limitations
+
+The limitations in the process of measurement of the original dataset should be considered. Specifically, the limitations include:
 
 - Observer Bias
 
 Although inspectors conduct the violation detection procedure in reference to the same, standardized fire safety regulations (Ontario Fire Code, FPPA and Municipal Code, according to City of Toronto) to ensure consistency, their subjective judgment could still play a significant role in the examination process. 
 
-Various interpretations of the guidelines and different decision-making procedures made by the inspectors based on specific situations could impact the outcome of the inspection. Since the examinations have been thoroughly completed by human, the assessments could differ depending on the inspectors' focus and perspectives on certain regulations, influencing the observations recorded, even with clear rules.
+Various interpretations of the guidelines and different decision-making procedures employed by the inspectors based on specific situations could impact the outcome of the inspection. The inspectors' focus during an inspection may vary depending on their experience, training, and individual judgment. Even though the examinations are conducted following clear rules, the outcomes of assessments could differ based on the inspectors' focus on certain regulations. As a result, the observations recorded during inspections might vary, introducing potential inconsistencies in how violations are identified. This variability could lead to differences in the recorded outcomes of inspections, impacting the reliability of the data.
 
 - Data Completeness
 
-The dataset does not capture all fire safety-related phenomena in Toronto, as it only contains the properties that have been inspected by the Inspectors from TFS. The properties that are not included in the list fail to provide any information, which would make the dataset not representative enough to conclude the situations of fire safety checks for the whole city.
+The dataset does not capture all fire safety-related phenomena in Toronto, as it only contains the properties that have been inspected by the Inspectors from Toronto Fire Services. Properties that have not been inspected are not included in the dataset, meaning that there is no information available about their fire safety violation status. This limitation means that the dataset may not be fully representative of the overall fire safety situation across the city. Without data from properties that were not inspected, it is difficult to draw generalized conclusions about fire safety checks for the entire city, as the sample may be biased towards properties that have undergone inspection.
 
-Moreover, even for the properties that have been inspected by TFS, not all cases are recorded in the dataset. The raw dataset only includes 'closed' cases, which are specific cases where the inspection process has ended, and does not account for cases currently under review or in progress.
+Moreover, even for the properties that have been inspected by TFS, not all cases are recorded in the dataset. The raw dataset only includes 'closed' cases, which are specific cases where the inspection process has ended. It does not account for cases currently under inspection or in progress, potentially leading to an incomplete picture of the fire safety status in Toronto.
 
-In other words, the properties whose initial observations have been made but further investigation or corrective actions are required, are excluded from the dataset. Therefore, the dataset does not represent the full scope of fire safety checks at any given time. The active cases would be neglected in analysis procedure, providing limited insights to identify fire safety concerns in real-time.
+In other words, the properties whose initial observations have been made but further investigation or corrective actions are required, are excluded from the dataset. Any ongoing cases, particularly those that are in the early stages of investigation, are not included. This could potentially lead to selection bias and skew the results. Therefore, the dataset fails to represent the full scope of fire safety checks at any given time. The active cases would be neglected in the analysis, providing limited basis to identify fire safety concerns in real-time.
+
+
+
+## Future Steps
+
+To further improve fire safety prevention and ensure more effective inspections, potential future research and action should be considered.
+
+One key step for future research is try to include ongoing inspections and active enforcement cases in the analysis. The current study only took closed inspection cases into consideration, excluding properties still under review or those requiring further enforcement. This potentially introduces a selection bias. By including ongoing inspections and active cases, future studies could provide a more generalized view of fire safety violations for properties in Toronto, and further offer evaluation of how violations evolve over time. Potentially, examining the dates of inspections and corresponding outcomes could help understand whether certain time periods lead to higher rates of violation of fire safety regulations in residential properties.
+
+While property type and inspection duration were the primary focus of this study, other factors which may contribute to the likelihood of fire safety violations should also be taken into consideration. Future research should include additional aspects and variables, such as building age, maintenance history, fire safety training for residents, and even fire department resources. For instance, older buildings or those with a history of poor maintenance may have larger possibility to be detected for violations. Another example is regional differences: Properties in certain areas of the city may face different fire safety challenges due to their geographic location or local regulations. Understanding these additional factors could help create a more complete model to predict fire safety violations and lead to more targeted inspection strategies.
+
+After the inspection and enforcement process ends, Toronto Fire Services could also check the outcomes of fire safety inspections to obtain a general overview of the fire prevention status in the city. Including resident feedback through surveys or interviews could provide valuable insights into the effectiveness of fire safety inspections and regulations from the perspective of the people directly affected by these policies. Detailed idealized methodology would be further discussed in [Appendix -@sec-appx-survey]. Moreover, residents' awareness of fire safety could also be considered as an additional factor to be included in the model. Future research could examine how residents’ knowledge of fire safety regulations, their adherence to safety practices, and their willingness to report violations impact the likelihood of violations.
+
+In conclusion, while this paper offers predictions and analysis of fire safety violations in Toronto, there are still many questions left to answer. By expanding the scope of the analysis by including additional variables, or possibly distributing surveys to the residents, future research could provide a more complete picture of fire safety status in the residential properties in the city. This will help fire safety authorities develop more targeted, efficient, and sustainable strategies for reducing violations, and ensuring the safety of residents.
 
 
 
@@ -572,7 +607,7 @@ In other words, the properties whose initial observations have been made but fur
 
 # Appendix {-}
 
-# Surveys, Sampling, and Observational Data
+# Surveys, Sampling, and Observational Data {#sec-appx-survey}
 
 ## Overview of the Idealized Fire Safety Resident Survey
 
