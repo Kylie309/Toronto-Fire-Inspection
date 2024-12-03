@@ -1,12 +1,12 @@
 ---
 title: "Fire Safety Regulation Violations in Toronto Residential Properties: Analysis by Property Type and Inspection Duration"
-subtitle: "Most properties would have a high probability of violation, whereeas high-rise buildings, rooming houses, and group homes have the highest risk"
+subtitle: "High Probability of Violations Across Most Properties, with High-Rise Buildings, Rooming Houses, and Group Homes Exhibiting the Highest Risk"
 author: 
   - Yunkai Gu
 thanks: "Code and data are available at: [https://github.com/Kylie309/Toronto-Fire-Inspection](https://github.com/Kylie309/Toronto-Fire-Inspection)."
 date: today
 date-format: long
-abstract: "This paper analyzes fire safety regulation violations in residential properties across Toronto, predicting the likelihood of violations based on the inspection duration and property type. By using a Bayesian logistic regression model, the study finds that property type plays a significant role in predicting violations, with high-rise buildings, rooming houses, and group homes at higher risk, and predicts with high confidence that most properties in the city would have a high probability of being observed to have a violation of fire safety regulations. These findings are important for improving fire safety protocols, as they suggest that targeting inspections towards high-risk property types could lead to more effective resource allocation and better safety outcomes. Findings in the study would motivate targeted inspections and interventions concentrated on properties that present the greatest risk, enhancing the effectiveness of fire safety efforts and helping to reduce potential fire accidents more efficiently."
+abstract: "This paper analyzes fire safety regulation violations in residential properties across Toronto, predicting the likelihood of violations based on the inspection duration and property type, using data from fire safety inspections ended during 2024. By using a Bayesian logistic regression model, the study finds that property type plays a significant role in predicting violations, with high-rise buildings, rooming houses, and group homes at higher risk, and predicts with high confidence that most properties in the city would have a high probability of being observed to have a violation of fire safety regulations. These findings are important for improving fire safety protocols, as they suggest that targeting inspections towards high-risk property types could lead to more effective resource allocation and better safety outcomes. Findings in the study would motivate targeted inspections and interventions concentrated on properties that present the greatest risk, enhancing the effectiveness of fire safety efforts and helping to reduce potential fire accidents more efficiently."
 format: pdf
 number-sections: true
 toc: true
@@ -23,26 +23,20 @@ bibliography: references.bib
 library(tidyverse)
 library(janitor)
 library(lubridate)
-library(broom)
 library(modelsummary)
 library(rstanarm)
-library(splines)
 library(ggplot2)
 library(arrow)
 library(knitr)
 library(kableExtra)
 library(RColorBrewer)
+library(broom)
 library(broom.mixed)
 
-
 # Read the cleaned data
-cleaned_data <- read_csv(
-  file = here::here("data/02-analysis_data/fire_cleaned_data.csv")
+cleaned_data <- read_parquet(
+  file = here::here("data/02-analysis_data/fire_cleaned_data.parquet")
   )
-data <- read_csv(
-  file = here::here("data/02-analysis_data/fire_cleaned_data.csv")
-  )
-
 ```
 
 
@@ -84,11 +78,23 @@ Note that though the dataset named "Highrise" Residential Fire Inspection Result
 
 To ensure the analysis presented in this paper remains relevant and current, only inspection cases that have concluded their inspection files or enforcement proceedings within the year 2024 are selected. This is achieved by filtering the dataset to keep only rows where the 'INSPECTIONS_CLOSEDDATE' column displays a date that falls within the year 2024. This approach ensures that the data reflects the most recent developments, providing an up-to-date basis for analysis and maintaining a clear and accurate representation of the latest trends and outcomes in fire safety checks. 
 
-More detailed data cleaning process is included in [Appendix -@sec-appx-data].
+@tbl-overview presents several sample lines of the cleaned dataset. More detailed data cleaning process is included in [Appendix -@sec-appx-data]. 
 
-The analyses presented in this paper were conducted using R programming language [@citeR]. The `tidyverse` packages [@citetidyverse] were used in the process of data simulation, testing beforehand. After the original raw data was downloaded by using `tidyverse` package [@citetidyverse], data cleaning process was done by using `tidyverse` package [@citetidyverse], `lubridate` package [@citelubridate], and `arrow` package [@citearrow]. We use `testthat` package [@citetest] to develop the test for structure and format of simulation and analysis data. 
+```{r}
+#| echo: false
+#| eval: true
+#| label: tbl-overview
+#| tbl-cap: "Preview of the Cleaned Dataset"
+#| warning: false
 
-Then, models were constructed using `tidyverse` package [@citetidyverse], `lubridate` package [@citelubridate] and `rstanarm` [@citerstanarm] package. The model results were then presented by both the tables and graphs. Tables were made with `modelsummary` [@citemodelsummary] package, `broom.mixed` [@citebroom] package, `dplyr` [@citedplyr] package and `knitr` package. Graphs were made with `ggplot2` package [@citeggplot] and `RColorBrewer` package [@citercolorbrewer].
+cleaned_data |>
+  head() |>
+  kable(format = "simple")
+```
+
+The analyses presented in this paper were conducted using R programming language [@citeR]. The `tidyverse` packages [@citetidyverse] were used in the process of data simulation, testing and downloading. After the original raw data was successfully downloaded, data cleaning process was done by using `tidyverse` package [@citetidyverse], `lubridate` package [@citelubridate], `janitor` package [@citejanitor] and `dplyr` package [@citedplyr]. The analysis dataset after cleaning is saved as a parquet file using `arrow` package [@citearrow].
+
+Then, models were constructed using `tidyverse` package [@citetidyverse], `lubridate` package [@citelubridate] and `rstanarm` [@citerstanarm] package. The model results were then presented by both the tables and graphs. Tables were made with `modelsummary` [@citemodelsummary] package, `broom.mixed` package [@citebroom], `dplyr` package [@citedplyr], `knitr` package [@citeknitr] and `kableExtra` package [@citekableextra]. Graphs were made with `ggplot2` package [@citeggplot].
 
 Following @tellingstories, this paper uses Bayesian modeling to predict the pass or fail status for safety checks of the properties in Toronto. The factors of region, property type and inspection time intervals from the dataset are mainly chosen and considered to examine their effects on the likelihood of violations for the properties.
 
@@ -128,9 +134,8 @@ In conclusion, the data contains a higher number of cases with violations (1) co
 #| warning: false
 #| message: false
 
-
 # Create bar plot
-data |>
+cleaned_data |>
   ggplot(aes(x = as.factor(violation), fill = as.factor(violation))) +
   geom_bar(color = "black") +
   labs(
@@ -150,7 +155,6 @@ data |>
     legend.title = element_text(size = 12),
     legend.text = element_text(size = 10)
   )
-
 ```
 
 
@@ -175,14 +179,12 @@ During the data cleaning process, the date is converted into time interval to en
 #| warning: false
 #| message: false
 
-
-data |> 
+cleaned_data |> 
   ggplot(aes(x = date_num)) + 
   geom_histogram(fill = "skyblue", color = "black", alpha = 0.7) +
   labs(x = "Inspection Time Interval (Days)",
        y = "Counts of Properties") +
   theme_minimal()
-
 ```
 
 
@@ -207,11 +209,10 @@ In general, there is a diverse distribution across the property types, with some
 #| fig-subcap: ["High Rise versus Low Rise", "Other Types"]
 #| layout-ncol: 2
 
-
-data_rise <- data %>% 
+data_rise <- cleaned_data %>% 
   filter(property_type == "High Rise" | property_type == "Low Rise")
 
-data_other <- data %>% 
+data_other <- cleaned_data %>% 
   filter(property_type != "High Rise" & property_type != "Low Rise")
 
 # Create bar plot for high rise properties versus low rise properties
@@ -257,7 +258,6 @@ data_other |>
     legend.title = element_text(size = 12),
     legend.text = element_text(size = 10)
   )
-
 ```
 
 
@@ -279,7 +279,7 @@ The other property types, especially "Detention" and "Nursing Home", show a much
 #| message: false
 
 
-data |> 
+cleaned_data |> 
   ggplot(aes(x = as.factor(violation), fill = as.factor(violation))) +
   geom_bar(color = "black") +
   facet_wrap(~ property_type, scales = "free_y") + # Create one subplot per property type
@@ -448,17 +448,13 @@ modelsummary::modelsummary(
 summary_stats <- summary(model)
 
 # Use `tidy()` for a clean tabular format
-library(broom.mixed)
 tidy_stats <- tidy(model, conf.int = TRUE)
 
 # Round all numeric columns to 3 decimal places
-library(dplyr)
 tidy_stats <- tidy_stats %>%
   mutate(across(where(is.numeric), ~ round(., 3)))
 
 # Create a table of parameter estimates
-library(knitr)
-
 tidy_stats %>%
   kable(format = "simple", col.names = c("Parameter", "Estimate", "Std.Error", "Conf.Low", "Conf.High"))
 
@@ -985,9 +981,25 @@ If budget allows, offering cash or gifts as rewards could motivate the audience 
 
 
 
-# Additional data details {#sec-appx-data}
+# Additional Data Details {#sec-appx-data}
 
-# Model details {#sec-model-details}
+The dataset cleaning process for preparation follows several steps:
+
+1. The column names are standardized to snake_case using `janitor` package for consistency and readability.
+
+2. The date information in the 'inspections_closeddate' and  'inspection_opendate' columns are initially recorded in inconsistent format. The date information is processed and stored as a valid date type in the columns, either from the datetime (ymd_hms) or date-only (ymd) parsing using `lubridate` package.
+
+3. The dataset is then filtered to keep only cases (rows) where inspection processes were closed during 2024, i.e. 'inspections_closeddate' is on or after January 1, 2024.
+
+4. Time interval between the start date and end date of the inspection (i.e. difference in days between 'inspections_closeddate' and 'inspections_opendate') is calculated and stored as a new numeric column called 'date_num'.
+
+5. A new column named 'violation' is created to indicate whether there was a violation being detected in the inspection case. If the 'violations_item_number' presents value of 0, 'violation' is set to 0; otherwise, it is set to 1.
+
+6. Finally, only necessary column are selected and retained in the cleaned dataset: 'property_type', 'inspections_opendate', 'inspections_closeddate', 'date_num', and 'violation'.
+
+
+
+# Model Details {#sec-model-details}
 
 ## Posterior Predictive Check {#sec-ppc}
 
@@ -1117,7 +1129,9 @@ plot(model, "rhat")
 
 
 
+
 \newpage
+
 
 
 # References
