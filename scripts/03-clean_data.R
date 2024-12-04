@@ -5,7 +5,7 @@
 # Contact: kylie.gu@mail.utoronto.ca
 # License: MIT
 # Pre-requisites:
-# - The `tidyverse` `dplyr` `lubridate` package must be installed and loaded
+# - The `tidyverse` `dplyr` `lubridate` `arrow` package must be installed and loaded
 # - 02-download_data.R must have been run
 # Any other information needed? Make sure you are in the `Toronto_Fire_Inspection` rproj
 
