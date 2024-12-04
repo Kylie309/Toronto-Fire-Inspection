@@ -346,7 +346,7 @@ The Bayesian model could be expressed with the following mathematical formulatio
 where:
 
 - $\text{logit}(p_i) = \log\left(\frac{p_i}{1 - p_i}\right)$ represents the log-odds of $p_i$.
-- $\beta_0$ is the intercept term of the Bayesian logistic regression, representing the baseline log-odds of a violation when $date = 0$ and 'type' is the reference category. Formula (2) specifies that $\beta_0$ follows normal distribution with a mean of 0 and a variance of $2.5^2$.
+- $\beta_0$ is the intercept term of the Bayesian logistic regression, representing the baseline log-odds of a violation when $\text{date} = 0$ and 'type' is the reference category. Formula (2) specifies that $\beta_0$ follows normal distribution with a mean of 0 and a variance of $2.5^2$.
 - $\beta_1$ is the coefficient for predictor variable 'date', representing the change in log-odds of a violation for per unit increase in 'date', i.e., the inspection time interval. Formula (3) specifies that $\beta_1$ follows normal distribution with a mean of 0 and a variance of $2.5^2$.
 - $\beta_2$ is the coefficient for the predictor variable 'type', representing the change in log-odds of a violation for each unit increase in 'type'. Formula (4) specifies that $\beta_2$ follows normal distribution with a mean of 0 and a variance of $2.5^2$.
 
@@ -404,7 +404,7 @@ Therefore, after considering these alternatives, the final model of Bayesian log
 
 The results of the Bayesian logistic regression model are summarized in @tbl-modelresults. The table provides information about the coefficients and main summary statistics.
 
-The table firstly lists estimates of coefficients for all parameters. The first line suggests an intercept of -6.72 for the model, indicating very low baseline odds of a violation for the reference property type when $date = 0$. The second line shows that the estimated coefficient for predictor 'date' is 0.02, which is very small and suggests that the inspection duration has a negligible effect on the violation outcome of observations.
+The table firstly lists estimates of coefficients for all parameters. The first line suggests an intercept of -6.72 for the model, indicating very low baseline odds of a violation for the reference property type when $\text{date} = 0$. The second line shows that the estimated coefficient for predictor 'date' is 0.02, which is very small and suggests that the inspection duration has a negligible effect on the violation outcome of observations.
 
 The table then presents the coefficients for every property type respectively. All property types show large positive coefficients, meaning that they increase the log-odds of violations and have a higher risk of violation compared to the reference property type. For example, for the property type of "Group Home", the log-odds of violation increases by 5.88; for the property type of "High Rise", the increase is 6.21; for the property type of "Hospital", the increase is 4.67; and so on. It could be observed that "Nursing Home" has the smallest coefficient, suggesting that it has the smallest effect on the likelihood of violations. However, it still contributes positively to the log-odds of a violation.
 
